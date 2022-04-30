@@ -43,3 +43,4 @@ application.log
 app/cmd/email.txt
 app/cmd/SendEmailCmdV3.scala
 /staging/
+.DS_Store
