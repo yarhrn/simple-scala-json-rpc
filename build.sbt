@@ -44,8 +44,9 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
   .settings(
     name := "sttp",
     publishing,
-    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
-    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
+//    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
+    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.5.2",
+//    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
   )
 lazy val core = (project in file("core")).settings(
   name := "core",
@@ -53,3 +54,10 @@ lazy val core = (project in file("core")).settings(
   libraryDependencies += "org.typelevel" %% "cats-core" % "2.7.0",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
 )
+
+lazy val example = (project in file("example")).settings(
+  name := "example",
+  publishing,
+  libraryDependencies += "org.typelevel" %% "cats-core" % "2.7.0",
+  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
+).dependsOn(core)
