@@ -1,4 +1,5 @@
 package jsonrpc.sttp
+
 import cats.effect._
 import org.http4s._
 import org.http4s.dsl.io._
@@ -8,12 +9,14 @@ import cats.effect.unsafe.IORuntime
 import org.http4s.ember.server.EmberServerBuilder
 import cats.syntax.all._
 import com.comcast.ip4s._
+import jsonrpc.sttp.Api.MultiplyResponse
 import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
 
 import scala.concurrent.duration._
-import jsonrpc.{JsonRpcServer, MethodDefinition}
+import jsonrpc.{JsonRpcClient, JsonRpcError, JsonRpcServer, MethodDefinition}
+import org.http4s.EntityDecoder.collectBinary
 import play.api.libs.json.Json
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
@@ -24,22 +27,26 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
 
   "SttpJsonRpc" should "sdfsdf" in {
-    val server = JsonRpcServer.create[Try](
+    val server = JsonRpcServer.create[IO](
       List(
-        Api.Multiply.handler(request => Try(Right(Api.MultiplyResponse(request.b * request.a))))
+        Api.Multiply.handler(request => IO[Either[JsonRpcError, MultiplyResponse]](Right(Api.MultiplyResponse(request.b * request.a))))
       )
     )
-
-    implicit val client = SttpJsonRpcClient[IO](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), identity, "http://0.0.0.0:8080/json-rpc")
-
     implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
+    val stto = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
+    implicit val client123: JsonRpcClient[IO] = SttpJsonRpcClient[IO](stto, identity, "http://0.0.0.0:8080/json-rpc")
+
+
     val helloWorldService = HttpRoutes.of[IO] {
-      case req @ POST -> Root / "json-rpc"  =>
-        req.decodeStrict[String]{
+      case req@POST -> Root / "json-rpc" =>
+        req.decodeWith(EntityDecoder.decodeBy(MediaRange.`*/*`)(msg =>
+          collectBinary(msg).map(chunk =>
+            new String(chunk.toArray, msg.charset.getOrElse(Charset.`UTF-8`).nioCharset)
+          )
+        ), true) {
           body =>
-            println(body)
-            Ok("")
+            Ok(server.handle(body))
         }
     }
 
@@ -47,15 +54,15 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp( Router("/" -> helloWorldService).orNotFound)
+      .withHttpApp(Router("/" -> helloWorldService).orNotFound)
       .build
       .useForever
       .start
       .unsafeToFuture()
 
 
-    Api.Multiply.execute(Api.MultiplyRequest(10,80)).unsafeRunSync()
-
+    val result = Api.Multiply.execute(Api.MultiplyRequest(10, 80)).unsafeRunSync().toOption.get
+    assert(result == MultiplyResponse(800))
   }
 
 }

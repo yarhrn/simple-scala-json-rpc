@@ -60,10 +60,3 @@ lazy val core = (project in file("core")).settings(
   libraryDependencies += "org.typelevel" %% "cats-core" % "2.7.0",
   libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
 )
-
-lazy val example = (project in file("example")).settings(
-  name := "example",
-  publishing,
-  libraryDependencies += "org.typelevel" %% "cats-core" % "2.7.0",
-  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
-).dependsOn(core)

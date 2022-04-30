@@ -28,6 +28,8 @@ case class ServerResponseParseError() extends JsonRpcClientError
 
 case class ServerInvalidResponseError() extends JsonRpcClientError
 
+case class ServerRespondedWithNoResultError() extends JsonRpcClientError
+
 case class ServerRespondWithError(error: JsonRpcError) extends JsonRpcClientError
 
 case class JsonRpcExecuteException(error: JsonRpcClientError, method: String) extends RuntimeException(s"error while executing $method, error: ${error}")

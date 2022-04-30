@@ -26,11 +26,16 @@ object JsonRpcRequest {
   implicit val JsonRpcRequestFormat: OFormat[JsonRpcRequest] = Json.format[JsonRpcRequest]
 }
 
+case class JsonRpcResponse(jsonrpc: String, id: String, result: Option[JsValue], error: Option[JsonRpcError])
+
+object JsonRpcResponse {
+  implicit val JsonRpcResponseFormat: OFormat[JsonRpcResponse] = Json.format[JsonRpcResponse]
+}
 
 
 object Handler {
   def create[A, B, F[_] : Monad](definition: MethodDefinition[A, B],
-                                   method: A => F[Either[JsonRpcError, B]]): Handler[F] = new Handler[F] {
+                                 method: A => F[Either[JsonRpcError, B]]): Handler[F] = new Handler[F] {
 
     override def handle(a: JsValue): F[Either[JsonRpcError, JsValue]] = {
       definition.req.reads(a).asEither.left.map(_ => JsonRpcError.InvalidParams).fold(
@@ -55,16 +60,19 @@ object JsonRpcServer {
         handler <- handlers.find(_.methodName == rpcRequest.method).toRight(JsonRpcError.MethodNotFound)
       } yield handler.handle(rpcRequest.params)
 
-      val prefix = Json.obj(
-        "jsonrpc" -> "2.0",
-        "id" -> parsed.toOption.flatMap(r => (r \ "id").toOption).get)
+      val response = JsonRpcResponse(
+        jsonrpc = "2.0",
+        id = parsed.toOption.flatMap(r => (r \ "id").asOpt[String]).get,
+        result = None,
+        error = None
+      )
 
 
       res match {
-        case Left(error) => Monad[F].pure(Json.stringify(prefix deepMerge Json.obj("error" -> error.render)))
+        case Left(error) => Monad[F].pure(Json.stringify(Json.toJson(response.copy(error = Some(error)))))
         case Right(res) => res.map {
-          case Left(error) => Json.stringify(prefix deepMerge Json.obj("error" -> error.render))
-          case Right(value) => Json.stringify(prefix deepMerge Json.obj("result" -> value))
+          case Left(error) => Json.stringify(Json.toJson(response.copy(error = Some(error))))
+          case Right(result) => Json.stringify(Json.toJson(response.copy(result = Some(result))))
         }
       }
     }
