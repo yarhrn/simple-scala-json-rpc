@@ -1,19 +1,20 @@
 import sbt.Keys.libraryDependencies
 import ReleaseTransformations._
+
 name := "simple-scala-json-rpc"
 
 
 releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,              // : ReleaseStep
-  inquireVersions,                        // : ReleaseStep
-  runClean,                               // : ReleaseStep
-  runTest,                                // : ReleaseStep
-  setReleaseVersion,                      // : ReleaseStep
-  commitReleaseVersion,                   // : ReleaseStep, performs the initial git checks
-  tagRelease,                             // : ReleaseStep
-  setNextVersion,                         // : ReleaseStep
-  commitNextVersion,                      // : ReleaseStep
-  pushChanges                             // : ReleaseStep, also checks that an upstream branch is properly configured
+  checkSnapshotDependencies, // : ReleaseStep
+  inquireVersions, // : ReleaseStep
+  runClean, // : ReleaseStep
+  runTest, // : ReleaseStep
+  setReleaseVersion, // : ReleaseStep
+  commitReleaseVersion, // : ReleaseStep, performs the initial git checks
+  tagRelease, // : ReleaseStep
+  setNextVersion, // : ReleaseStep
+  commitNextVersion, // : ReleaseStep
+  pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
 )
 
 val common = List(
@@ -21,7 +22,6 @@ val common = List(
   scalaVersion := "2.13.6",
 )
 inThisBuild(common)
-
 
 
 val publishing = List(
@@ -36,18 +36,24 @@ val publishing = List(
   publishMavenStyle := true
 )
 
-
-
-scalaVersion := "2.13.8"
+val http4sVersion = "0.23.11"
 
 lazy val sttp = (project in file("sttp")).dependsOn(core)
   .settings(
     name := "sttp",
     publishing,
-//    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
+    //    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
+    //    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
     libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.5.2",
-//    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0" % Test,
+    libraryDependencies ++= Seq(
+      "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
+      "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
+      "org.http4s" %% "http4s-ember-client" % http4sVersion % Test,
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2"  % Test
+    )
   )
+
 lazy val core = (project in file("core")).settings(
   name := "core",
   publishing,

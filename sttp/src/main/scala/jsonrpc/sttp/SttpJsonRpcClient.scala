@@ -15,9 +15,9 @@ object SttpJsonRpcClient {
   type JsonRpcSttpRequest = Request[Either[String, String], Any]
 }
 
-class SttpJsonRpcClient[F[_]](sttp: SttpBackend[F, Any],
-                              adapt: JsonRpcSttpRequest => JsonRpcSttpRequest,
-                              url: String)(implicit F: Functor[F])
+case class SttpJsonRpcClient[F[_]](sttp: SttpBackend[F, Any],
+                                   adapt: JsonRpcSttpRequest => JsonRpcSttpRequest,
+                                   url: String)(implicit F: Functor[F])
   extends JsonRpcClient[F] {
   override def execute[A, B](methodDefinition: MethodDefinition[A, B], request: A): F[Either[JsonRpcClientError, B]] = {
     val jsonRpcRequest = Json.obj(

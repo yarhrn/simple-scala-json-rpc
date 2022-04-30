@@ -34,7 +34,7 @@ object Handler {
 
     override def handle(a: JsValue): F[Either[JsonRpcError, JsValue]] = {
       definition.req.reads(a).asEither.left.map(_ => JsonRpcError.InvalidParams).fold(
-        error => Monad[F].pure(error),
+        error => Monad[F].pure(Left(error)),
         request => method(request).map(_.map(definition.res.writes))
       )
     }
@@ -57,11 +57,11 @@ object JsonRpcServer {
 
       val prefix = Json.obj(
         "jsonrpc" -> "2.0",
-        "id" -> parsed.toOption.flatMap(r => (r \ "id").toOption).getOrElse(JsNull))
+        "id" -> parsed.toOption.flatMap(r => (r \ "id").toOption).get)
 
 
       res match {
-        case Left(error) => Monad[F].pure(prefix deepMerge Json.obj("error" -> error.render))
+        case Left(error) => Monad[F].pure(Json.stringify(prefix deepMerge Json.obj("error" -> error.render)))
         case Right(res) => res.map {
           case Left(error) => Json.stringify(prefix deepMerge Json.obj("error" -> error.render))
           case Right(value) => Json.stringify(prefix deepMerge Json.obj("result" -> value))
