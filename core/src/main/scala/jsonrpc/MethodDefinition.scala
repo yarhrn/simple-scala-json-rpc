@@ -1,6 +1,7 @@
 package jsonrpc
 
 import cats.{Functor, Monad}
+import jsonrpc.client.{FailingJsonRpcClient, JsonRpcClient, JsonRpcClientError}
 import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
 
 case class MethodDefinition[Req, Res] private(methodName: String, req: Format[Req], res: Format[Res]) {

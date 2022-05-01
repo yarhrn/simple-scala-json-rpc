@@ -1,26 +1,21 @@
 package jsonrpc.sttp
 
 import cats.effect._
+import cats.effect.unsafe.IORuntime
+import com.comcast.ip4s._
+import jsonrpc.client.JsonRpcClient
+import jsonrpc.sttp.Api.MultiplyResponse
+import jsonrpc.{HandlerResult, JsonRpcServer, MethodDefinition}
+import org.http4s.EntityDecoder.collectBinary
 import org.http4s._
 import org.http4s.dsl.io._
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
-import cats.effect.unsafe.IORuntime
 import org.http4s.ember.server.EmberServerBuilder
-import cats.syntax.all._
-import com.comcast.ip4s._
-import jsonrpc.sttp.Api.MultiplyResponse
-import org.http4s.ember.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
-
-import scala.concurrent.duration._
-import jsonrpc.{JsonRpcClient, JsonRpcError, JsonRpcServer, MethodDefinition}
-import org.http4s.EntityDecoder.collectBinary
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-
-import scala.util.Try
 
 
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
@@ -29,13 +24,13 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
   "SttpJsonRpc" should "sdfsdf" in {
     val server = JsonRpcServer.create[IO](
       List(
-        Api.Multiply.handler(request => IO[Either[JsonRpcError, MultiplyResponse]](Right(Api.MultiplyResponse(request.b * request.a))))
+        Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
+        Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
       )
     )
     implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
-    val stto = AsyncHttpClientCatsBackend[IO]().unsafeRunSync()
-    implicit val client123: JsonRpcClient[IO] = SttpJsonRpcClient[IO](stto, identity, "http://0.0.0.0:8080/json-rpc")
+    implicit val client123: JsonRpcClient[IO] = JsonRpcClient.from(SttpTransportClient[IO](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), "http://0.0.0.0:8080/json-rpc"))
 
 
     val helloWorldService = HttpRoutes.of[IO] {

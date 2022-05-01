@@ -4,6 +4,7 @@ import cats.{Functor, Monad}
 import play.api.libs.json.JsValue
 import play.api.libs.json._
 import cats.implicits._
+import jsonrpc.HandlerResult.HandlerResult
 
 import scala.util.Try
 
@@ -33,11 +34,19 @@ object JsonRpcResponse {
 }
 
 
+object HandlerResult {
+  type HandlerResult[A] = Either[JsonRpcError, A]
+
+  def error[A](error: JsonRpcError): HandlerResult[A] = Left[JsonRpcError, A](error)
+
+  def success[A](request: A): HandlerResult[A] = Right[JsonRpcError, A](request)
+}
+
 object Handler {
   def create[A, B, F[_] : Monad](definition: MethodDefinition[A, B],
-                                 method: A => F[Either[JsonRpcError, B]]): Handler[F] = new Handler[F] {
+                                 method: A => F[HandlerResult[B]]): Handler[F] = new Handler[F] {
 
-    override def handle(a: JsValue): F[Either[JsonRpcError, JsValue]] = {
+    override def handle(a: JsValue): F[HandlerResult[JsValue]] = {
       definition.req.reads(a).asEither.left.map(_ => JsonRpcError.InvalidParams).fold(
         error => Monad[F].pure(Left(error)),
         request => method(request).map(_.map(definition.res.writes))
