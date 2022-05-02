@@ -14,8 +14,10 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+
+import java.time.Instant
 
 
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
@@ -30,6 +32,13 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
           println("triggered")
           HandlerResult.success(())
         }),
+        Api.TriggerRebuild.handler(IO {
+          println("triggered")
+          HandlerResult.success(())
+        }),
+        Api.GetInstant.handler(IO{
+          HandlerResult.success("ass" -> "sdfsdf")
+        })
       )
     )
     implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
@@ -62,6 +71,7 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
     val result = Api.Multiply.execute(Api.MultiplyRequest(10, 80)).unsafeRunSync().toOption.get
     Api.TriggerRebuild.execute.unsafeRunSync().toOption.get
+    println(Api.GetInstant.execute.unsafeRunSync().toOption.get)
     assert(result == MultiplyResponse(800))
   }
 
@@ -86,5 +96,7 @@ object Api {
   val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] = MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
 
   val TriggerRebuild: MethodDefinition[Unit, Unit] = MethodDefinition.create("trigger")
+
+  val GetInstant: MethodDefinition[Unit, (String, String)] = MethodDefinition.create("getInstant")
 
 }
