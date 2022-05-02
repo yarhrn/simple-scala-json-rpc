@@ -26,6 +26,10 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
       List(
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
+        Api.TriggerRebuild.handler(IO {
+          println("triggered")
+          HandlerResult.success(())
+        }),
       )
     )
     implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
@@ -57,12 +61,15 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
 
     val result = Api.Multiply.execute(Api.MultiplyRequest(10, 80)).unsafeRunSync().toOption.get
+    Api.TriggerRebuild.execute.unsafeRunSync().toOption.get
     assert(result == MultiplyResponse(800))
   }
 
 }
 
 object Api {
+
+  import MethodDefinition._
 
   case class MultiplyRequest(a: Int, b: Int)
 
@@ -76,6 +83,8 @@ object Api {
     implicit val MultiplyResponseFormat = Json.format[MultiplyResponse]
   }
 
-  def Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] = MethodDefinition.create("multiply")
+  val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] = MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
+
+  val TriggerRebuild: MethodDefinition[Unit, Unit] = MethodDefinition.create("trigger")
 
 }
