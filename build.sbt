@@ -17,14 +17,15 @@ releaseProcess := Seq[ReleaseStep](
   pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
 )
 
-val common = List(
-  scalaVersion := "2.13.6",
-  scalacOptions ++= List(
-    "-Wvalue-discard"
-  )
-)
-inThisBuild(common)
 
+lazy val scala212 = "2.12.16"
+lazy val scala213 = "2.13.6"
+lazy val supportedScalaVersions = List(scala212, scala213)
+
+ThisBuild / scalaVersion := scala213
+ThisBuild / scalacOptions ++= List(
+  "-Wvalue-discard"
+)
 
 val publishing = List(
   organization := "com.yarhrn",
