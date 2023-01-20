@@ -7,5 +7,6 @@ Json Rpc implementation
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.yarhrn" %% "rozklad" % "v{take version from badge above}"	
+libraryDependencies += "com.github.yarhrn.simple-scala-json-rpc" %% "simple-scala-json-rpc-core" % "v{take version from badge above}"	
+libraryDependencies += "com.github.yarhrn.simple-scala-json-rpc" %% "simple-scala-json-rpc-sttp" % "v{take version from badge above}"	
 ```
