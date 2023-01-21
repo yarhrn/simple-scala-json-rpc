@@ -3,7 +3,7 @@
 Json Rpc implementation
 
 ## Install
-![version](https://jitpack.io/v/yarhrn/rozklad.svg)
+[![](https://jitpack.io/v/yarhrn/simple-scala-json-rpc.svg)](https://jitpack.io/#yarhrn/simple-scala-json-rpc)
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io"
