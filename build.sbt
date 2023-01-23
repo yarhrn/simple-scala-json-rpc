@@ -26,6 +26,7 @@ ThisBuild / scalaVersion := scala213
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
+ThisBuild / releaseTagName := version.value
 
 val publishing = List(
   organization := "com.yarhrn",
