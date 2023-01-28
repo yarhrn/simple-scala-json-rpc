@@ -48,13 +48,13 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
     publishing,
     //    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
     //    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
-    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.5.2",
+    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.8.9",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0" % Test,
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-client" % http4sVersion % Test,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2"  % Test
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.8.9"  % Test
     )
   )
 
