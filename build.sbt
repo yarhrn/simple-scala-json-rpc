@@ -18,6 +18,12 @@ releaseProcess := Seq[ReleaseStep](
 )
 
 
+lazy val common = List(
+  releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
+)
+
+
+
 lazy val scala212 = "2.12.16"
 lazy val scala213 = "2.13.6"
 lazy val supportedScalaVersions = List(scala212, scala213)
@@ -55,12 +61,14 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
       "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-client" % http4sVersion % Test,
       "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2"  % Test
-    )
+    ),
+    common
   )
 
 lazy val core = (project in file("core")).settings(
   name := "simple-scala-json-rpc-core",
   publishing,
   libraryDependencies += "org.typelevel" %% "cats-core" % "2.7.0",
-  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
+  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1",
+  common
 )
