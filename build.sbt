@@ -1,5 +1,5 @@
 import sbt.Keys.libraryDependencies
-import ReleaseTransformations._
+import ReleaseTransformations.*
 
 name := "simple-scala-json-rpc"
 
@@ -54,13 +54,13 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
     publishing,
     //    libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.5.2",
     //    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.11",
-    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.8.15",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % Test,
+    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.9.7",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-client" % http4sVersion % Test,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.8.15"  % Test
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.9.7"  % Test
     ),
     common
   )
@@ -68,7 +68,7 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
 lazy val core = (project in file("core")).settings(
   name := "simple-scala-json-rpc-core",
   publishing,
-  libraryDependencies += "org.typelevel" %% "cats-core" % "2.9.0",
-  libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.4",
+  libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0",
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.4",
   common
 )

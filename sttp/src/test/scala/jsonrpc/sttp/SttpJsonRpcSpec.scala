@@ -23,7 +23,7 @@ import java.time.Instant
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
 
-  "SttpJsonRpc" should "sdfsdf" in {
+  "SttpJsonRpc" should "return" in {
     val server = JsonRpcServer.create[IO](
       List(
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
@@ -52,7 +52,7 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
           collectBinary(msg).map(chunk =>
             new String(chunk.toArray, msg.charset.getOrElse(Charset.`UTF-8`).nioCharset)
           )
-        ), true) {
+        ), strict = true) {
           body =>
             Ok(server.handle(body))
         }
@@ -84,13 +84,13 @@ object Api {
   case class MultiplyRequest(a: Int, b: Int)
 
   object MultiplyRequest {
-    implicit val MultiplyRequestFormat = Json.format[MultiplyRequest]
+    implicit val MultiplyRequestFormat: OFormat[MultiplyRequest] = Json.format[MultiplyRequest]
   }
 
   case class MultiplyResponse(res: Int)
 
   object MultiplyResponse {
-    implicit val MultiplyResponseFormat = Json.format[MultiplyResponse]
+    implicit val MultiplyResponseFormat: OFormat[MultiplyResponse] = Json.format[MultiplyResponse]
   }
 
   val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] = MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
