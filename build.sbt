@@ -22,8 +22,8 @@ lazy val common = List(
   releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 )
 
-ThisBuild / scalaVersion := "3.3.4"
-ThisBuild / crossScalaVersions := List("3.3.4", "2.13.16")
+ThisBuild / scalaVersion := "3.3.6"
+ThisBuild / crossScalaVersions := List("3.3.6", "2.13.16")
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
