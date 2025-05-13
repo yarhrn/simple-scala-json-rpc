@@ -14,7 +14,7 @@ case class MethodDefinition[Req, Res] private(methodName: String, req: Format[Re
   def execute[F[_]](request: Req)(implicit client: JsonRpcClient[F]): F[Either[JsonRpcClientError, Res]] = client.execute(this, request)
 
   // implicit ev: Req =!= Unit
-  def execute[F[_]](implicit ev: Req =:= Unit, client: JsonRpcClient[F]) = client.execute(this, ev.flip.apply(()))
+  def execute[F[_]](implicit ev: Req =:= Unit, client: JsonRpcClient[F]): F[Either[JsonRpcClientError,Res]] = client.execute(this, ev.flip.apply(()))
 
   def executeOrFail[F[_]](request: Req)(implicit client: FailingJsonRpcClient[F]): F[Res] = client.executeOrFail(this, request)
 

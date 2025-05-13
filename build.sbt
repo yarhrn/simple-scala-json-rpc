@@ -22,9 +22,8 @@ lazy val common = List(
   releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 )
 
-lazy val scala213 = "2.13.16"
-
-ThisBuild / scalaVersion := scala213
+ThisBuild / scalaVersion := "3.3.4"
+ThisBuild / crossScalaVersions := List("3.3.4", "2.13.16")
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
@@ -42,7 +41,7 @@ val publishing = List(
   publishMavenStyle := true
 )
 
-val http4sVersion = "0.23.18"
+val http4sVersion = "0.23.30"
 
 lazy val sttp = (project in file("sttp")).dependsOn(core)
   .settings(

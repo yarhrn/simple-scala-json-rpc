@@ -14,7 +14,7 @@ trait JsonRpcClient[F[_]] {
 }
 
 object JsonRpcClient{
-  def from[F[_]: Functor](transport: TransportLayerClient[F]) = new JsonRpcClient[F] {
+  def from[F[_]: Functor](transport: TransportLayerClient[F]): JsonRpcClient[F] = new JsonRpcClient[F] {
     override def execute[A, B](methodDefinition: MethodDefinition[A, B], request: A): F[Either[JsonRpcClientError, B]] = {
       val jsonRpcRequest = JsonRpcRequest(
         jsonrpc = "2.0",
@@ -46,7 +46,7 @@ trait FailingJsonRpcClient[F[_]] {
 }
 
 object FailingJsonRpcClient {
-  def from[F[_]](client: JsonRpcClient[F])(implicit ME: MonadError[F, Throwable]) = new FailingJsonRpcClient[F] {
+  def from[F[_]](client: JsonRpcClient[F])(implicit ME: MonadError[F, Throwable]): FailingJsonRpcClient[F] = new FailingJsonRpcClient[F] {
     override def executeOrFail[A, B](methodDefinition: MethodDefinition[A, B], request: A): F[B] = client.execute(methodDefinition, request).flatMap {
       case Left(error) => ME.raiseError(JsonRpcExecuteException(error, methodDefinition.methodName))
       case Right(value) => ME.pure(value)

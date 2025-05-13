@@ -7,10 +7,10 @@ case class JsonRpcError(code: Int, message: String, data: Option[JsValue]) {
 }
 
 object JsonRpcError{
-  val ParseError = JsonRpcError(-32700, "Parse error", None)
-  val InvalidRequest = JsonRpcError(-32600, "Invalid Request", None)
-  val MethodNotFound = JsonRpcError(-32601, "Method not found", None)
-  val InvalidParams = JsonRpcError(-32602, "Invalid params", None)
-  val InternalError = JsonRpcError(-32603, "Internal error", None)
+  val ParseError: JsonRpcError = JsonRpcError(-32700, "Parse error", None)
+  val InvalidRequest: JsonRpcError = JsonRpcError(-32600, "Invalid Request", None)
+  val MethodNotFound: JsonRpcError = JsonRpcError(-32601, "Method not found", None)
+  val InvalidParams: JsonRpcError = JsonRpcError(-32602, "Invalid params", None)
+  val InternalError: JsonRpcError = JsonRpcError(-32603, "Internal error", None)
   implicit val JsonRpcErrorFormat: OFormat[JsonRpcError] = Json.format
 }
