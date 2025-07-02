@@ -64,6 +64,6 @@ lazy val core = (project in file("core")).settings(
   name := "simple-scala-json-rpc-core",
   publishing,
   libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-  libraryDependencies += "org.playframework" %% "play-json" % "3.0.4",
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.5",
   common
 )
