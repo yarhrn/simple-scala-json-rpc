@@ -41,7 +41,7 @@ val publishing = List(
   publishMavenStyle := true
 )
 
-val http4sVersion = "0.23.30"
+val http4sVersion = "0.23.31"
 
 lazy val sttp = (project in file("sttp")).dependsOn(core)
   .settings(
