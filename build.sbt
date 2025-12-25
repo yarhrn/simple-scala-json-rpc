@@ -21,7 +21,7 @@ lazy val common = List(
 )
 
 ThisBuild / scalaVersion := "3.3.4"
-ThisBuild / crossScalaVersions := List("3.3.4", "2.13.16")
+ThisBuild / crossScalaVersions := List("3.3.4", "2.13.18")
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
