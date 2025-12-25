@@ -11,15 +11,19 @@ object SttpTransportClient {
   type JsonRpcSttpRequest = Request[Either[String, String], Any]
 }
 
-case class SttpTransportClient[F[_]](sttp: SttpBackend[F, Any],
-                                     url: String,
-                                     adapt: JsonRpcSttpRequest => JsonRpcSttpRequest = identity)(implicit F: Functor[F])
-  extends TransportLayerClient[F] {
+case class SttpTransportClient[F[_]](
+    sttp: SttpBackend[F, Any],
+    url: String,
+    adapt: JsonRpcSttpRequest => JsonRpcSttpRequest = identity)(implicit F: Functor[F])
+    extends TransportLayerClient[F] {
   override def execute(request: String): F[Response] = {
-    val sttpRequest = basicRequest.post(Uri.parse(url).right.get) // todo fix?
+    val sttpRequest = basicRequest
+      .post(Uri.parse(url).right.get) // todo fix?
       .body(request)
       .header("Content-Type", "application/json")
-    sttp.send(adapt(sttpRequest))
-      .map(response => Response(response.code.code, response.body.left.toOption.orElse(response.body.toOption))) // todo improve??
+    sttp
+      .send(adapt(sttpRequest))
+      .map(response =>
+        Response(response.code.code, response.body.left.toOption.orElse(response.body.toOption))) // todo improve??
   }
 }

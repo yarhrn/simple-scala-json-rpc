@@ -19,43 +19,45 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import java.time.Instant
 
-
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
-
 
   "SttpJsonRpc" should "return" in {
     val server = JsonRpcServer.create[IO](
       List(
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
-        Api.TriggerRebuild.handler(IO {
-          println("triggered")
-          HandlerResult.success(())
-        }),
-        Api.TriggerRebuild.handler(IO {
-          println("triggered")
-          HandlerResult.success(())
-        }),
-        Api.GetInstant.handler(IO{
-          HandlerResult.success("ass" -> "sdfsdf")
-        })
+        Api
+          .TriggerRebuild
+          .handler(IO {
+            println("triggered")
+            HandlerResult.success(())
+          }),
+        Api
+          .TriggerRebuild
+          .handler(IO {
+            println("triggered")
+            HandlerResult.success(())
+          }),
+        Api
+          .GetInstant
+          .handler(IO {
+            HandlerResult.success("ass" -> "sdfsdf")
+          })
       )
     )
     implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
-    implicit val client123: JsonRpcClient[IO] = JsonRpcClient.from(SttpTransportClient[IO](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), "http://0.0.0.0:8080/json-rpc"))
-
+    implicit val client123: JsonRpcClient[IO] = JsonRpcClient.from(
+      SttpTransportClient[IO](AsyncHttpClientCatsBackend[IO]().unsafeRunSync(), "http://0.0.0.0:8080/json-rpc"))
 
     val helloWorldService = HttpRoutes.of[IO] {
-      case req@POST -> Root / "json-rpc" =>
-        req.decodeWith(EntityDecoder.decodeBy(MediaRange.`*/*`)(msg =>
-          collectBinary(msg).map(chunk =>
-            new String(chunk.toArray, msg.charset.getOrElse(Charset.`UTF-8`).nioCharset)
-          )
-        ), strict = true) {
-          body =>
-            Ok(server.handle(body))
-        }
+      case req @ POST -> Root / "json-rpc" =>
+        req.decodeWith(
+          EntityDecoder.decodeBy(MediaRange.`*/*`)(msg =>
+            collectBinary(msg)
+              .map(chunk => new String(chunk.toArray, msg.charset.getOrElse(Charset.`UTF-8`).nioCharset))),
+          strict = true
+        ) { body => Ok(server.handle(body)) }
     }
 
     EmberServerBuilder
@@ -67,7 +69,6 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
       .useForever
       .start
       .unsafeToFuture()
-
 
     val result = Api.Multiply.execute(Api.MultiplyRequest(10, 80)).unsafeRunSync().toOption.get
     Api.TriggerRebuild.execute.unsafeRunSync().toOption.get
@@ -93,7 +94,8 @@ object Api {
     implicit val MultiplyResponseFormat: OFormat[MultiplyResponse] = Json.format[MultiplyResponse]
   }
 
-  val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] = MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
+  val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] =
+    MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
 
   val TriggerRebuild: MethodDefinition[Unit, Unit] = MethodDefinition.create("trigger")
 

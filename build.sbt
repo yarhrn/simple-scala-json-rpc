@@ -3,7 +3,6 @@ import ReleaseTransformations.*
 
 name := "simple-scala-json-rpc"
 
-
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies, // : ReleaseStep
   inquireVersions, // : ReleaseStep
@@ -16,7 +15,6 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion, // : ReleaseStep
   pushChanges // : ReleaseStep, also checks that an upstream branch is properly configured
 )
-
 
 lazy val common = List(
   releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
@@ -32,18 +30,18 @@ releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).v
 val publishing = List(
   organization := "com.yarhrn",
   homepage := Some(url("https://github.com/yarhrn/simple-scala-json-rpc")),
-  scmInfo := Some(ScmInfo(url("https://github.com/yarhrn/simple-scala-json-rpc"), "git@github.com:yarhrn/simple-scala-json-rpc.git")),
-  developers := List(Developer("Yaroslav Hryniuk",
-    "Yaroslav Hryniuk",
-    "yaroslavh.hryniuk@gmail.com",
-    url("https://github.com/yarhrn"))),
+  scmInfo := Some(
+    ScmInfo(url("https://github.com/yarhrn/simple-scala-json-rpc"), "git@github.com:yarhrn/simple-scala-json-rpc.git")),
+  developers := List(
+    Developer("Yaroslav Hryniuk", "Yaroslav Hryniuk", "yaroslavh.hryniuk@gmail.com", url("https://github.com/yarhrn"))),
   licenses += ("MIT", url("https://github.com/yarhrn/simple-scala-json-rpc/blob/main/LICENSE")),
   publishMavenStyle := true
 )
 
 val http4sVersion = "0.23.30"
 
-lazy val sttp = (project in file("sttp")).dependsOn(core)
+lazy val sttp = (project in file("sttp"))
+  .dependsOn(core)
   .settings(
     name := "simple-scala-json-rpc-sttp",
     publishing,
@@ -55,7 +53,7 @@ lazy val sttp = (project in file("sttp")).dependsOn(core)
       "org.http4s" %% "http4s-dsl" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-server" % http4sVersion % Test,
       "org.http4s" %% "http4s-ember-client" % http4sVersion % Test,
-      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.11.0"  % Test
+      "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.11.0" % Test
     ),
     common
   )

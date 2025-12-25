@@ -5,5 +5,3 @@ trait TransportLayerClient[F[_]] {
 }
 
 case class Response(status: Int, body: Option[String])
-
-
