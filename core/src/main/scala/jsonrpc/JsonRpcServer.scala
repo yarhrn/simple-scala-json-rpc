@@ -65,8 +65,8 @@ object JsonRpcServer {
       val parsed = Try(Json.parse(request)).toEither.left.map(_ => JsonRpcError.ParseError)
       val res: Either[JsonRpcError, F[Either[JsonRpcError, JsValue]]] = for {
         json <- parsed
-        rpcRequest <- json.validate[JsonRpcRequest].asEither.left.map(_ => JsonRpcError.InvalidRequest)
-        handler <- handlers.find(_.methodName == rpcRequest.method).toRight(JsonRpcError.MethodNotFound)
+        rpcRequest <- json.validate[JsonRpcRequest].asEither.left.map(_ => JsonRpcError.InvalidRequest(request))
+        handler <- handlers.find(_.methodName == rpcRequest.method).toRight(JsonRpcError.MethodNotFound(rpcRequest.method))
       } yield handler.handle(rpcRequest.params)
 
       val response = JsonRpcResponse(
