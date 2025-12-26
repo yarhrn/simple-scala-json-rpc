@@ -83,7 +83,7 @@ object JsonRpcServer {
 
       res match {
         case Left(error) => Monad[F].pure(Json.stringify(Json.toJson(response.copy(error = Some(error)))))
-        case Right(res) =>
+        case Right(res)  =>
           res.map {
             case Left(error)   => Json.stringify(Json.toJson(response.copy(error = Some(error))))
             case Right(result) => Json.stringify(Json.toJson(response.copy(result = Some(result))))
