@@ -45,7 +45,8 @@ object JsonRpcClient {
             jsonRpcResponse <- Try(json.as[JsonRpcResponse])
               .toEither
               .left
-              .map(e => ServerInvalidResponseError(methodName, response.status, response.body, requestBody, e.getMessage))
+              .map(e =>
+                ServerInvalidResponseError(methodName, response.status, response.body, requestBody, e.getMessage))
             _ <- jsonRpcResponse.error.map(e => ServerRespondWithError(methodName, e, requestBody)).toLeft(())
             result <- jsonRpcResponse
               .result
@@ -55,7 +56,8 @@ object JsonRpcClient {
               .reads(result)
               .asEither
               .left
-              .map(errors => ServerResultMappingError(methodName, response.status, response.body, requestBody, errors.toString))
+              .map(errors =>
+                ServerResultMappingError(methodName, response.status, response.body, requestBody, errors.toString))
           } yield res
         } else {
           Left(ServerRespondedWithNon200CodeError(methodName, response.status, response.body, requestBody))
