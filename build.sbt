@@ -20,8 +20,8 @@ lazy val common = List(
   releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 )
 
-ThisBuild / scalaVersion := "3.3.4"
-ThisBuild / crossScalaVersions := List("3.3.4", "2.13.16")
+ThisBuild / scalaVersion := "3.3.7"
+ThisBuild / crossScalaVersions := List("3.3.7", "2.13.16")
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
@@ -62,6 +62,6 @@ lazy val core = (project in file("core")).settings(
   name := "simple-scala-json-rpc-core",
   publishing,
   libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-  libraryDependencies += "org.playframework" %% "play-json" % "3.0.4",
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.6",
   common
 )

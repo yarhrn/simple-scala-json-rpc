@@ -23,7 +23,24 @@ trait Handler[F[_]] {
 case class JsonRpcRequest(jsonrpc: String, id: String, method: String, params: JsValue)
 
 object JsonRpcRequest {
-  implicit val JsonRpcRequestFormat: OFormat[JsonRpcRequest] = Json.format[JsonRpcRequest]
+  import play.api.libs.functional.syntax._
+
+  private val idReads: Reads[String] = Reads[String] {
+    case JsString(s) => JsSuccess(s)
+    case JsNumber(n) => JsSuccess(n.toString)
+    case other       => JsError(s"Unsupported id type: $other")
+  }
+
+  implicit val JsonRpcRequestReads: Reads[JsonRpcRequest] = (
+    (__ \ "jsonrpc").read[String] and
+    (__ \ "id").read[String](idReads) and
+    (__ \ "method").read[String] and
+    (__ \ "params").readWithDefault[JsValue](JsNull)
+  )(JsonRpcRequest.apply _)
+
+  implicit val JsonRpcRequestWrites: OWrites[JsonRpcRequest] = Json.writes[JsonRpcRequest]
+
+  implicit val JsonRpcRequestFormat: OFormat[JsonRpcRequest] = OFormat(JsonRpcRequestReads, JsonRpcRequestWrites)
 }
 
 case class JsonRpcResponse(jsonrpc: String, id: String, result: Option[JsValue], error: Option[JsonRpcError])
@@ -76,7 +93,7 @@ object JsonRpcServer {
 
       val response = JsonRpcResponse(
         jsonrpc = "2.0",
-        id = parsed.toOption.flatMap(r => (r \ "id").asOpt[String]).get,
+        id = parsed.toOption.flatMap(r => (r \ "id").asOpt[String].orElse((r \ "id").asOpt[BigDecimal].map(_.toString))).getOrElse(""),
         result = None,
         error = None
       )
