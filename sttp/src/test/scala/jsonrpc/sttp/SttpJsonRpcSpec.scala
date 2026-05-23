@@ -14,10 +14,9 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.{Json, OFormat}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-
-import java.time.Instant
+import upickle.default.ReadWriter
+import upickle.jsonschema.JsonSchema
 
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
@@ -25,13 +24,6 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
     val server = JsonRpcServer.create[IO](
       List(
         Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
-        Api.Multiply.handler(request => IO(HandlerResult.success(Api.MultiplyResponse(request.b * request.a)))),
-        Api
-          .TriggerRebuild
-          .handler(IO {
-            println("triggered")
-            HandlerResult.success(())
-          }),
         Api
           .TriggerRebuild
           .handler(IO {
@@ -41,7 +33,7 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
         Api
           .GetInstant
           .handler(IO {
-            HandlerResult.success("ass" -> "sdfsdf")
+            HandlerResult.success(("ass", "sdfsdf"))
           })
       )
     )
@@ -80,25 +72,13 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
 object Api {
 
-  import MethodDefinition._
-
-  case class MultiplyRequest(a: Int, b: Int)
-
-  object MultiplyRequest {
-    implicit val MultiplyRequestFormat: OFormat[MultiplyRequest] = Json.format[MultiplyRequest]
-  }
-
-  case class MultiplyResponse(res: Int)
-
-  object MultiplyResponse {
-    implicit val MultiplyResponseFormat: OFormat[MultiplyResponse] = Json.format[MultiplyResponse]
-  }
+  case class MultiplyRequest(a: Int, b: Int) derives ReadWriter, JsonSchema
+  case class MultiplyResponse(res: Int)      derives ReadWriter, JsonSchema
 
   val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] =
     MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
 
-  val TriggerRebuild: MethodDefinition[Unit, Unit] = MethodDefinition.create("trigger")
+  val TriggerRebuild: MethodDefinition[Unit, Unit] = MethodDefinition.create[Unit, Unit]("trigger")
 
-  val GetInstant: MethodDefinition[Unit, (String, String)] = MethodDefinition.create("getInstant")
-
+  val GetInstant: MethodDefinition[Unit, (String, String)] = MethodDefinition.create[Unit, (String, String)]("getInstant")
 }
