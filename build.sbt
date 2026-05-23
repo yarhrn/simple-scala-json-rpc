@@ -20,8 +20,8 @@ lazy val common = List(
   releaseTagName := s"${if (releaseUseGlobalVersion.value) (ThisBuild / version).value else version.value}"
 )
 
-ThisBuild / scalaVersion := "3.8.1"
-ThisBuild / crossScalaVersions := List("3.8.1")
+ThisBuild / scalaVersion := "3.8.3"
+ThisBuild / crossScalaVersions := List("3.8.3")
 ThisBuild / scalacOptions ++= List(
   "-Wvalue-discard"
 )
@@ -57,14 +57,13 @@ lazy val sttp = (project in file("sttp"))
     common
   )
 
-lazy val core = (project in file("core"))
-  .settings(
-    name := "simple-scala-json-rpc-core",
-    publishing,
-    libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-    libraryDependencies += "com.lihaoyi" %% "upickle" % upickleVersion,
-    libraryDependencies += "com.lihaoyi" %% "upickle-jsonschema" % upickleVersion,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-    libraryDependencies += "org.playframework" %% "play-json" % "3.0.6" % Test,
-    common
-  )
+lazy val core = (project in file("core")).settings(
+  name := "simple-scala-json-rpc-core",
+  publishing,
+  libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
+  libraryDependencies += "com.lihaoyi" %% "upickle" % upickleVersion,
+  libraryDependencies += "com.lihaoyi" %% "upickle-jsonschema" % upickleVersion,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.6" % Test,
+  common
+)
