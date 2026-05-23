@@ -25,7 +25,7 @@ case class JsonRpcRequest(jsonrpc: String, id: String, method: String, params: u
 object JsonRpcRequest {
 
   /** JSON-RPC ids may be either string or number. Stored as string. */
-  private[jsonrpc] def parseId(v: ujson.Value): String = v match {
+  private def parseId(v: ujson.Value): String = v match {
     case ujson.Str(s) => s
     case ujson.Num(n) => if (n == n.toLong.toDouble) n.toLong.toString else n.toString
     case other        => throw new IllegalArgumentException(s"Unsupported id type: $other")
@@ -54,29 +54,7 @@ object JsonRpcRequest {
 case class JsonRpcResponse(jsonrpc: String, id: String, result: Option[ujson.Value], error: Option[JsonRpcError])
 
 object JsonRpcResponse {
-  // Per JSON-RPC 2.0: exactly one of `result` / `error` is present. A `result: null` is a valid success
-  // (e.g. for Unit-returning methods), so we must distinguish key presence from a `null` value rather
-  // than rely on macroRW, which would conflate the two.
-  implicit val rw: ReadWriter[JsonRpcResponse] =
-    readwriter[ujson.Value].bimap[JsonRpcResponse](
-      resp => {
-        val builder = new upickle.core.LinkedHashMap[String, ujson.Value]()
-        builder("jsonrpc") = ujson.Str(resp.jsonrpc)
-        builder("id")      = ujson.Str(resp.id)
-        resp.result.foreach(r => builder("result") = r)
-        resp.error.foreach(e => builder("error")   = upickle.default.writeJs(e))
-        ujson.Obj(builder)
-      },
-      json => {
-        val obj = json.obj
-        JsonRpcResponse(
-          jsonrpc = obj("jsonrpc").str,
-          id      = JsonRpcRequest.parseId(obj("id")),
-          result  = obj.get("result"),
-          error   = obj.get("error").map(e => read[JsonRpcError](e))
-        )
-      }
-    )
+  implicit val rw: ReadWriter[JsonRpcResponse] = macroRW
 }
 
 object HandlerResult {
