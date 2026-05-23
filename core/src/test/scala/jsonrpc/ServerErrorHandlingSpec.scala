@@ -57,8 +57,27 @@ class ServerErrorHandlingSpec extends AnyFlatSpec with Matchers {
       Echo.handler[Try](req => Try(HandlerResult.success(EchoResponse(req.value))))
     )
     val r = call(server, "echo", """{"value":"hi"}""")
-    r("result")("value").str shouldBe "hi"
-    r("error")               shouldBe ujson.Null
+    r("result")("value").str        shouldBe "hi"
+    r.obj.contains("error")         shouldBe false
+  }
+
+  it should "omit the result key on errors (per JSON-RPC 2.0)" in {
+    val server = serverWith(
+      Throwing.handler[Try](_ => throw new RuntimeException("boom"))
+    )
+    val r = call(server, "throwing")
+    r.obj.contains("result") shouldBe false
+    r.obj.contains("error")  shouldBe true
+  }
+
+  it should "round-trip a Unit success: result key present and null" in {
+    val server = serverWith(
+      Throwing.handler[Try](_ => Try(HandlerResult.success(())))
+    )
+    val raw    = server.handle("""{"jsonrpc":"2.0","id":"1","method":"throwing","params":{}}""").get
+    val parsed = upickle.default.read[JsonRpcResponse](raw)
+    parsed.result shouldBe Some(ujson.Null)
+    parsed.error  shouldBe None
   }
 }
 

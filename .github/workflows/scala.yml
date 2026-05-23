@@ -21,11 +21,11 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: sbt
       - uses: sbt/setup-sbt@v1
         with:
-          sbt-runner-version: 1.9.9
+          sbt-runner-version: 1.10.11
       - name: Build and test
         shell: bash
         run: sbt -v +test
