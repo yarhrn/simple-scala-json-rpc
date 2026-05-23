@@ -6,7 +6,6 @@ import jsonrpc.client.JsonRpcClientError.{
   ServerInvalidResponseError,
   ServerRespondWithError,
   ServerRespondedWithEmptyBodyError,
-  ServerRespondedWithNoResultError,
   ServerRespondedWithNon200CodeError,
   ServerResponseParseError,
   ServerResultMappingError
@@ -47,9 +46,7 @@ object JsonRpcClient {
               .left
               .map(e => ServerInvalidResponseError(methodName, response.status, response.body, requestBody, e.getMessage))
             _ <- jsonRpcResponse.error.map(e => ServerRespondWithError(methodName, e, requestBody)).toLeft(())
-            result <- jsonRpcResponse
-              .result
-              .toRight(ServerRespondedWithNoResultError(methodName, response.status, response.body, requestBody))
+            result = jsonRpcResponse.result.getOrElse(ujson.Null)
             res <- Try(read[B](result)(using methodDefinition.resRW))
               .toEither
               .left
