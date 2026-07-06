@@ -38,7 +38,7 @@ val publishing = List(
   publishMavenStyle := true
 )
 
-val http4sVersion = "0.23.30"
+val http4sVersion = "0.23.35"
 val upickleVersion = "4.4.3"
 
 lazy val sttp = (project in file("sttp"))
@@ -57,14 +57,13 @@ lazy val sttp = (project in file("sttp"))
     common
   )
 
-lazy val core = (project in file("core"))
-  .settings(
-    name := "simple-scala-json-rpc-core",
-    publishing,
-    libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-    libraryDependencies += "com.lihaoyi" %% "upickle" % upickleVersion,
-    libraryDependencies += "com.lihaoyi" %% "upickle-jsonschema" % upickleVersion,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-    libraryDependencies += "org.playframework" %% "play-json" % "3.0.6" % Test,
-    common
-  )
+lazy val core = (project in file("core")).settings(
+  name := "simple-scala-json-rpc-core",
+  publishing,
+  libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
+  libraryDependencies += "com.lihaoyi" %% "upickle" % upickleVersion,
+  libraryDependencies += "com.lihaoyi" %% "upickle-jsonschema" % upickleVersion,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.6" % Test,
+  common
+)
