@@ -14,9 +14,8 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.{Json, OFormat}
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import upickle.default.ReadWriter
-import upickle.jsonschema.JsonSchema
 
 class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
@@ -72,8 +71,18 @@ class SttpJsonRpcSpec extends AnyFlatSpec with Matchers {
 
 object Api {
 
-  case class MultiplyRequest(a: Int, b: Int) derives ReadWriter, JsonSchema
-  case class MultiplyResponse(res: Int)      derives ReadWriter, JsonSchema
+  // Brings `EmtpyResponseFormat` into scope, providing `Format[Unit]` for parameterless methods.
+  import jsonrpc.MethodDefinition.EmtpyResponseFormat
+
+  case class MultiplyRequest(a: Int, b: Int)
+  object MultiplyRequest {
+    implicit val format: OFormat[MultiplyRequest] = Json.format
+  }
+
+  case class MultiplyResponse(res: Int)
+  object MultiplyResponse {
+    implicit val format: OFormat[MultiplyResponse] = Json.format
+  }
 
   val Multiply: MethodDefinition[MultiplyRequest, MultiplyResponse] =
     MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")

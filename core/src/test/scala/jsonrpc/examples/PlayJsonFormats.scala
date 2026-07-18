@@ -6,8 +6,8 @@ import play.api.libs.json._
 
 import java.time.{Duration, Instant}
 
-/** play-json [[Format]] instances for the same case classes that derive upickle's `ReadWriter`,
-  * used by [[CrossLibraryRoundtripSpec]] to verify on-wire compatibility.
+/** play-json [[Format]] instances for the [[Data]] case classes and the shared value types
+  * ([[RamielId]], `Instant`, `Duration`), used by [[DataSpec]] to check on-wire round-trips.
   */
 object PlayJsonFormats {
 

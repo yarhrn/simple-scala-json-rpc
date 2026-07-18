@@ -1,19 +1,19 @@
 package jsonrpc
 
-import upickle.default.ReadWriter
-import upickle.jsonschema.JsonSchema
+import play.api.libs.json.{JsValue, Json, OFormat}
 
-case class JsonRpcError(code: Int, message: String, data: Option[ujson.Value])
-    derives ReadWriter, JsonSchema
+case class JsonRpcError(code: Int, message: String, data: Option[JsValue]) {
+  def render: JsValue = Json.obj("code" -> code, "message" -> message, "data" -> data)
+}
 
 object JsonRpcError {
   val ParseError: JsonRpcError = JsonRpcError(-32700, "Parse error", None)
 
   def InvalidRequest(request: String): JsonRpcError =
-    JsonRpcError(-32600, "Invalid Request", Some(ujson.Obj("request" -> request)))
+    JsonRpcError(-32600, "Invalid Request", Some(Json.obj("request" -> request)))
 
   def MethodNotFound(method: String): JsonRpcError =
-    JsonRpcError(-32601, "Method not found", Some(ujson.Obj("method" -> method)))
+    JsonRpcError(-32601, "Method not found", Some(Json.obj("method" -> method)))
 
   val InvalidParams: JsonRpcError = JsonRpcError(-32602, "Invalid params", None)
 
@@ -21,9 +21,11 @@ object JsonRpcError {
     JsonRpcError(
       code    = -32603,
       message = "Internal error",
-      data    = Some(ujson.Obj(
+      data    = Some(Json.obj(
         "exception" -> throwable.getClass.getName,
         "message"   -> Option(throwable.getMessage).getOrElse("")
       ))
     )
+
+  implicit val JsonRpcErrorFormat: OFormat[JsonRpcError] = Json.format
 }

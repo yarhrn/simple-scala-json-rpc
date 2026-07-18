@@ -39,7 +39,6 @@ val publishing = List(
 )
 
 val http4sVersion = "0.23.30"
-val upickleVersion = "4.4.3"
 
 lazy val sttp = (project in file("sttp"))
   .dependsOn(core)
@@ -62,9 +61,7 @@ lazy val core = (project in file("core"))
     name := "simple-scala-json-rpc-core",
     publishing,
     libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-    libraryDependencies += "com.lihaoyi" %% "upickle" % upickleVersion,
-    libraryDependencies += "com.lihaoyi" %% "upickle-jsonschema" % upickleVersion,
+    libraryDependencies += "org.playframework" %% "play-json" % "3.0.6",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-    libraryDependencies += "org.playframework" %% "play-json" % "3.0.6" % Test,
     common
   )

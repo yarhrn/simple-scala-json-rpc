@@ -6,12 +6,13 @@ import jsonrpc.client.JsonRpcClientError.{
   ServerInvalidResponseError,
   ServerRespondWithError,
   ServerRespondedWithEmptyBodyError,
+  ServerRespondedWithNoResultError,
   ServerRespondedWithNon200CodeError,
   ServerResponseParseError,
   ServerResultMappingError
 }
 import jsonrpc.{JsonRpcError, JsonRpcRequest, JsonRpcResponse, MethodDefinition}
-import upickle.default.{read, write, writeJs}
+import play.api.libs.json.Json
 
 import java.util.UUID
 import scala.util.Try
@@ -29,28 +30,33 @@ object JsonRpcClient {
         jsonrpc = "2.0",
         method  = methodDefinition.methodName,
         id      = UUID.randomUUID().toString,
-        params  = writeJs(request)(using methodDefinition.reqRW)
+        params  = methodDefinition.req.writes(request)
       )
-      val requestBody = write(jsonRpcRequest)
+      val requestBody = Json.stringify(Json.toJson(jsonRpcRequest))
       transport.execute(requestBody).map { response =>
         val methodName = methodDefinition.methodName
         if (response.status == 200) {
           for {
             body <- response.body.toRight(ServerRespondedWithEmptyBodyError(methodName, response.status, requestBody))
-            json <- Try(ujson.read(body))
+            json <- Try(Json.parse(body))
               .toEither
               .left
               .map(e => ServerResponseParseError(methodName, response.status, response.body, requestBody, e.getMessage))
-            jsonRpcResponse <- Try(read[JsonRpcResponse](json))
+            jsonRpcResponse <- Try(json.as[JsonRpcResponse])
               .toEither
               .left
               .map(e => ServerInvalidResponseError(methodName, response.status, response.body, requestBody, e.getMessage))
             _ <- jsonRpcResponse.error.map(e => ServerRespondWithError(methodName, e, requestBody)).toLeft(())
-            result = jsonRpcResponse.result.getOrElse(ujson.Null)
-            res <- Try(read[B](result)(using methodDefinition.resRW))
-              .toEither
+            result <- jsonRpcResponse
+              .result
+              .toRight(ServerRespondedWithNoResultError(methodName, response.status, response.body, requestBody))
+            res <- methodDefinition
+              .res
+              .reads(result)
+              .asEither
               .left
-              .map(e => ServerResultMappingError(methodName, response.status, response.body, requestBody, e.getMessage))
+              .map(errors =>
+                ServerResultMappingError(methodName, response.status, response.body, requestBody, errors.toString))
           } yield res
         } else {
           Left(ServerRespondedWithNon200CodeError(methodName, response.status, response.body, requestBody))

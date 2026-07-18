@@ -10,8 +10,7 @@ A lightweight, type-safe [JSON-RPC 2.0](https://www.jsonrpc.org/specification) i
 - Server and client implementations
 - Functional approach using Cats type classes (`Functor`, `Monad`, `MonadThrow`)
 - Pluggable transport layer (STTP integration included)
-- uPickle for JSON serialization (`derives ReadWriter`)
-- **Auto-generated introspection**: every method exposes a `<method>.introspect` endpoint returning JSON Schemas for its input and output
+- Play JSON for serialization
 
 ## Installation
 
@@ -31,20 +30,32 @@ libraryDependencies += "com.github.yarhrn.simple-scala-json-rpc" %% "simple-scal
 
 ### 1. Define Your API Methods
 
-Request and response types derive both `ReadWriter` (for JSON serialization) and `JsonSchema` (for introspection):
+Each request and response type needs a Play JSON `Format`. Define one with the `Json.format` macro in the companion object (Play JSON does not support Scala 3's `derives` clause):
 
 ```scala
 import jsonrpc.MethodDefinition
-import upickle.default.ReadWriter
-import upickle.jsonschema.JsonSchema
+import play.api.libs.json.{Json, OFormat}
 
-case class MultiplyRequest(a: Int, b: Int)  derives ReadWriter, JsonSchema
-case class MultiplyResponse(result: Int)    derives ReadWriter, JsonSchema
+case class MultiplyRequest(a: Int, b: Int)
+object MultiplyRequest {
+  implicit val format: OFormat[MultiplyRequest] = Json.format
+}
+
+case class MultiplyResponse(result: Int)
+object MultiplyResponse {
+  implicit val format: OFormat[MultiplyResponse] = Json.format
+}
 
 val Multiply = MethodDefinition.create[MultiplyRequest, MultiplyResponse]("multiply")
 
-// Method with no request parameters
-case class StatusResponse(status: String) derives ReadWriter, JsonSchema
+// Method with no request parameters — `Unit` uses the built-in empty format,
+// brought into scope by importing it explicitly:
+import jsonrpc.MethodDefinition.EmtpyResponseFormat
+
+case class StatusResponse(status: String)
+object StatusResponse {
+  implicit val format: OFormat[StatusResponse] = Json.format
+}
 val GetStatus = MethodDefinition.create[Unit, StatusResponse]("getStatus")
 ```
 
@@ -107,32 +118,6 @@ given FailingJsonRpcClient[IO] = FailingJsonRpcClient.from(summon[JsonRpcClient[
 val result: IO[MultiplyResponse] = Multiply.executeOrFail(MultiplyRequest(10, 5))
 ```
 
-## Introspection
-
-`JsonRpcServer.create` automatically registers a companion `<method>.introspect` endpoint for every handler. Calling it returns the method name plus JSON Schemas (Draft 2020-12) for its input and output types, derived at compile time from the case classes.
-
-For the `multiply` method above, calling `multiply.introspect` returns:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": "1",
-  "result": {
-    "method": "multiply",
-    "input":  { "$schema": "https://json-schema.org/draft/2020-12/schema", "...": "..." },
-    "output": { "$schema": "https://json-schema.org/draft/2020-12/schema", "...": "..." }
-  }
-}
-```
-
-This makes the server self-describing: clients, docs, and tooling can discover the shape of every method without an external schema file. Schemas are also available directly on the `MethodDefinition`:
-
-```scala
-Multiply.renderedInputSchema   // ujson.Value
-Multiply.renderedOutputSchema  // ujson.Value
-Multiply.introspection         // MethodIntrospection(method, input, output)
-```
-
 ## Error Handling
 
 The library provides standard JSON-RPC 2.0 error codes:
@@ -175,7 +160,7 @@ class MyTransportClient[F[_]] extends TransportLayerClient[F] {
 
 | Module                          | Description                                                            |
 |---------------------------------|------------------------------------------------------------------------|
-| `simple-scala-json-rpc-core`    | Core library: server, client interfaces, method definitions, schemas  |
+| `simple-scala-json-rpc-core`    | Core library: server, client interfaces, and method definitions        |
 | `simple-scala-json-rpc-sttp`    | STTP-based transport client implementation                             |
 
 ## Requirements
