@@ -38,7 +38,7 @@ val publishing = List(
   publishMavenStyle := true
 )
 
-val http4sVersion = "0.23.30"
+val http4sVersion = "0.23.36"
 
 lazy val sttp = (project in file("sttp"))
   .dependsOn(core)
@@ -56,12 +56,11 @@ lazy val sttp = (project in file("sttp"))
     common
   )
 
-lazy val core = (project in file("core"))
-  .settings(
-    name := "simple-scala-json-rpc-core",
-    publishing,
-    libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
-    libraryDependencies += "org.playframework" %% "play-json" % "3.0.6",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-    common
-  )
+lazy val core = (project in file("core")).settings(
+  name := "simple-scala-json-rpc-core",
+  publishing,
+  libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0",
+  libraryDependencies += "org.playframework" %% "play-json" % "3.0.6",
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  common
+)
